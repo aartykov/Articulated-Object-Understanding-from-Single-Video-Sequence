@@ -1,1 +1,636 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="We introduce a method that recovers 3D geometry, appearance, and motion of generic articulated objects from a monocular video.">
+  <meta name="keywords" content="video sequence, articulated objects, gaussian splatting">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Articulated Object Understanding from a Single Video Sequence </title>
+  <!-- Google tag (gtag.js) -->
 
+
+ <!-- <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RTFCJBYBW2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RTFCJBYBW2');
+  </script> -->
+
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+
+    
+          
+            
+    
+
+          
+          Expand Down
+    
+    
+  
+        rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/logo.jpg">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+  
+<body>
+<!--<nav class="navbar" role="navigation" aria-label="main navigation">-->
+<!--  <div class="navbar-brand">-->
+<!--    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">-->
+<!--      <span aria-hidden="true"></span>-->
+<!--      <span aria-hidden="true"></span>-->
+<!--      <span aria-hidden="true"></span>-->
+<!--    </a>-->
+<!--  </div>-->
+<!--  <div class="navbar-menu">-->
+<!--    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">-->
+<!--      <a class="navbar-item" href="https://keunhong.com">-->
+<!--      <span class="icon">-->
+<!--          <i class="fas fa-home"></i>-->
+<!--      </span>-->
+<!--      </a>-->
+<!--      <div class="navbar-item has-dropdown is-hoverable">-->
+<!--        <a class="navbar-link">-->
+<!--          More Research-->
+<!--        </a>-->
+<!--        <div class="navbar-dropdown">-->
+<!--          <a class="navbar-item" href="https://vevenom.github.io/r1">-->
+<!--            R1-->
+<!--          </a>-->
+<!--          <a class="navbar-item" href="https://vevenom.github.io/r2">-->
+<!--            R2-->
+<!--          </a>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</nav>-->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title"> Articulated Object Understanding from a Single Video Sequence </h1>
+          <div class="is-size-5 publication-authors">
+              <!-- <img src="./static/images/logo.jpg" -->
+               <!--  class="interpolation-image" -->
+                 <!-- alt="Logo" style="height: 100px;"/> -->
+              <!-- </br> -->
+            <span class="author-block">
+              <a href="https://aartykov.github.io" target="_blank">Arslan Artykov</a></sup>,</span>
+           <span class="author-block">
+              <a href="https://clementinboittiaux.github.io/" target="_blank">Clémentin Boittiaux</a></sup>,</span>
+           
+            </span>
+            <span class="author-block">
+              <a href="https://vincentlepetit.github.io/" target="_blank">Vincent Lepetit</a></sup>
+            </span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"></sup>LIGM, École des Ponts, IP Paris, CNRS, France </span>
+          </div>
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="./static/gDT-IV_00007.pdf"
+                   target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+               <!-- </a> -->
+                <a href="./static/gDT-IV-00007_supp.pdf" 
+                  target="_blank" 
+                  class="external-link button is-normal is-rounded is-dark"> 
+                  <span class="icon"> 
+                    <i class="fas fa-file-pdf"></i>  
+                 </span>  
+                 <span>Supplementary Material</span> 
+              <!--  </a>  -->
+              <!-- </span> -->
+             <!-- <span class="link-block"> -->
+                <a href=""
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code (Coming Soon)</span>
+                </a>
+              </span>
+<!--              <span class="link-block">-->
+<!--                <a href="https://arxiv.org/abs/2011.12948"-->
+<!--                   class="external-link button is-normal is-rounded is-dark">-->
+<!--                  <span class="icon">-->
+<!--                      <i class="ai ai-arxiv"></i>-->
+<!--                  </span>-->
+<!--                  <span>arXiv</span>-->
+<!--                </a>-->
+<!--              </span>-->
+              <!-- Video Link. -->
+<!--              <span class="link-block">-->
+<!--                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"-->
+<!--                   class="external-link button is-normal is-rounded is-dark">-->
+<!--                  <span class="icon">-->
+<!--                      <i class="fab fa-youtube"></i>-->
+<!--                  </span>-->
+<!--                  <span>Video</span>-->
+<!--                </a>-->
+<!--              </span>-->
+              <!-- Code Link. -->
+<!--              <span class="link-block">-->
+<!--                <a href="https://github.com/google/nerfies"-->
+<!--                   class="external-link button is-normal is-rounded is-dark">-->
+<!--                  <span class="icon">-->
+<!--                      <i class="fab fa-github"></i>-->
+<!--                  </span>-->
+<!--                  <span>Code</span>-->
+<!--                  </a>-->
+<!--              </span>-->
+              <!-- Dataset Link. -->
+<!--              <span class="link-block">-->
+<!--                <a href="https://github.com/google/nerfies/releases/tag/0.1"-->
+<!--                   class="external-link button is-normal is-rounded is-dark">-->
+<!--                  <span class="icon">-->
+<!--                      <i class="far fa-images"></i>-->
+<!--                  </span>-->
+<!--                  <span>Data</span>-->
+<!--                  </a>-->
+<!--              </span>-->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <h2 class="subtitle has-text-centered">
+        <span class="magic-gs"></span> Current research models articulated objects either from multi-view images or demo videos with scans, which is impractical in real settings.
+        We propose a method to jointly model 3D shape, motion, and joint parameters from only a casual input video.
+      </h2>
+      
+      <video id="teaser" width="13000" height="auto" autoplay muted loop playsinline>
+        <source src="./static/videos/teaser_video_last_2.mp4"
+                type="video/mp4">
+      </video>
+      
+      <!-- <video id="teaser_2" height="10%" autoplay muted loop playsinline> -->
+      <!--  <source src="./static/videos/pr2.mp4" -->
+      <!--          type="video/mp4"> -->
+        
+     <!-- </video> -->
+    
+    </div>
+</section>
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+             We introduce a novel method for estimating the
+            structure and joint parameters of articulated objects from a
+            single casual video, captured by a potentially moving camera.
+            Unlike previous works that rely on multiple static views
+            or a priori knowledge of the object category, our approach
+            leverages 2D point tracking and depth map prediction to
+            generate 3D trajectories of points on the object. By analyzing
+            these trajectories, we generate and evaluate hypotheses
+            about joint parameters, selecting the best combination using
+            the Bayesian Information Criterion (BIC) to avoid overfitting.
+            We then optimize a dense 3D model of the object
+            using Gaussian Splatting, guided by the selected joint hypotheses.
+            Our method accurately recovers the geometry,
+            segmentation into parts, joint parameters, and motion of
+            each part, enabling the rendering of the object from new
+            viewpoints and under new articulation states. Extensive
+            evaluations on several datasets demonstrate the effectiveness
+            of our approach.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+<!-- <section class="section">
+  <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Method Overview</h2>
+        <div class="content has-text-justified">
+          <img src="./static/images/main_figure_updated.png"
+                 class="interpolation-image"
+                 alt="Teaser image."/>
+            <p> Given RGBD frames of the input video sequence, we first calculate 3D trajectories of the surface points of the target object with satate-of-the-art point tracker.
+            Then our method randomly selects a trajectory Ti, randomly picks a type of articulation and computes joint parameters for this trajectory.</p>
+        </div>
+      </div>
+  </div>
+</section> -->
+<style>
+  .image-label {
+    font-size: 1.0rem;      /* smaller text */
+    /* font-style: italic;      /* caption-like italics */ */
+    color: #000000;          /* subtle gray */
+    margin-top: 0.5rem;      /* small spacing below image */
+    text-align: center;      /* center label text */
+    display: block;          /* ensure full-width centering */
+  }
+  .image-label-gray {
+    font-size: 1.0rem;      /* smaller text */
+    font-style: italic;      /* caption-like italics */
+    color: #000000;          /* subtle gray */
+    margin-top: 0.5rem;      /* small spacing below image */
+    text-align: center;      /* center label text */
+    display: block;          /* ensure full-width centering */
+  }
+  .single-image-container {
+    margin-top: 3rem; /* spacing from above section */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .single-image-container img {
+    max-width: 40%;  /* centered and smaller */
+    height: auto;
+  }
+  .general-comment {
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    color: #4a4a4a;
+  }
+  
+  .image img {
+    object-fit: cover;
+    border-radius: 8px; /* optional rounded corners */
+  }
+  
+</style>
+    
+<section class="section">
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <h2 class="title is-3">Method Overview</h2>
+      <div class="content has-text-justified">
+        <p class="general-comment has-text-justified">
+        Given RGBD frames of the input video sequence, we first calculate 3D trajectories of the surface points of the target object with a state-of-the-art point tracker.
+        Then our method randomly selects a trajectory <em>T<sub>i</sub></em>, randomly picks a type of articulation, and computes joint parameters for this trajectory.
+      </p>
+        <div class="columns is-centered">
+          <div class="column is-one-third">
+            <figure class="image is-4by3">
+              <img src="./static/images/traj-storage.png" alt="Image 1">
+            </figure>
+            <p class="image-label-gray"> 3D trajectories</p>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-4by3">
+              <img src="./static/images/h_prismatic.png" alt="Image 2">
+            </figure>
+            <p class="image-label-gray">prismatic joint</p>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-4by3">
+              <img src="./static/images/h_revolute.png" alt="Image 3">
+            </figure>
+            <p class="image-label-gray">revolute joint</p>
+          </div>
+        </div>
+        <!-- <p class="general-comment has-text-justified"
+          Given RGBD frames of the input video sequence, we first calculate 3D trajectories of the surface points of the target object with a state-of-the-art point tracker.
+          Then our method randomly selects a trajectory Ti, randomly picks a type of articulation, and computes joint parameters for this trajectory.
+        </p> -->
+        <p class="general-comment has-text-justified">
+          Then we check if there are other trajectories that can also be explained by these joint parameters. 
+          When it is the case, we keep the computed joint parameters as a good hypothesis. By iterating this process we generate hypothesis set of joint parameters, <em>H</em>. 
+        </p>
+        <!-- Additional single centered image below -->
+        <div class="single-image-container">
+          <img src="./static/images/hypothesis_set_fig_4.png" alt="Extra overview image">
+          <p class="image-label-gray">Visualization of the joint parameters in the hypothesis set H </p>
+        </div>
+        <p class="general-comment has-text-justified">
+          We select correct number of hypotheses from the hypothesis set <em>H</em> by using Bayesian Information Criterion. We keep the combination <em>C</em>, which yields the lowest BIC(<em>C</em>) value.
+  
+        </p>
+        <p style="text-align: center; font-style: italic; font-size: 1.1rem;">
+                        BIC(C) = k(C) · ln(n) + λL(C)
+        </p>
+        <p class="general-comment has-text-justified">
+          Finally, we conduct Gaussian Splatting optimization, where we initialize the gaussian centers using the points in the trajectories.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Qualitative Results</h2>
+        <div class="content has-text-justified">
+          <p>Below we show part segmentation and joint parameters prediction results on the multi-part objects from PartNet dataset and on the real casual videos captured with Iphone camera. </p>
+           <!-- <video id="reconstruction" width="7000" height="auto" autoplay muted loop playsinline>
+            <source src="./static/videos/reconstruction.mp4"
+                    type="video/mp4">
+          </video> -->
+  <section class="section">
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <!-- <h2 class="title is-3">Results Visualization</h2> -->
+      <div class="content">
+        <!-- 3x3 image grid -->
+        <div class="columns is-multiline is-centered">
+          <!-- Row 1 -->
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/storage41083/GT.png" alt="Image 1">
+            </figure>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/storage41083/DTA.png" alt="Image 2" >
+            </figure>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/storage41083/ours.png" alt="Image 3">
+            </figure>
+          </div>
+          <!-- Row 2 -->
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/storage/GT.png" alt="Image 4">
+            </figure>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/storage/DTA (1).png" alt="Image 5">
+            </figure>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/storage/ours.png" alt="Image 6">
+            </figure>
+          </div>
+          <!-- Row 3 -->
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/fridge/GT.png" alt="Image 7">
+            </figure>
+            <p class="image-label">Ground Truth</p>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/fridge/DTA.png" alt="Image 8">
+            </figure>
+            <p class="image-label">DTA</p>
+          </div>
+          <div class="column is-one-third">
+            <figure class="image is-square">
+              <img src="./static/images/fridge/ours.png" alt="Image 9">
+            </figure>
+            <p class="image-label">Ours</p>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+ </section>
+          
+        </div>
+      </div>
+  </div>
+</section>
+<div class="content has-text-centered">
+  <!-- Centered video -->
+  <video 
+    id="reconstruction"
+    width="500"
+    autoplay
+    muted
+    loop
+    playsinline
+    style="display: block; margin: 0 auto; border-radius: 8px;"
+  >
+    <source src="./static/videos/gDT-IV-00007_supp.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <!-- 
+  <p class="has-text-centered is-size-6 has-text-grey" style="margin-top: 0.75rem;">
+    Part segmentation and joint parameters prediction results on the real-world dataset.
+  </p> -->
+  
+</div>
+    
+<!-- <section class="section">
+  <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Part Segmentation Results</h2>
+        <div class="content has-text-justified">
+          <p> To articulate dynamic parts of an object, the method needs to correctly group the Gaussians. Below, we show that our method can perform robust and accurate part-level segmentation. The right column represents 
+segmented 3D Gaussian centers in the canonical coordinate system, while the left one represents the corresponding ground-truth masks.</p>
+           <img src="./static/images/segmentation.png"
+                 class="interpolation-image"
+                 alt="segmentation image." />
+                <!-- style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"/> -->
+          
+        </div>
+      </div>
+  </div>
+</section> 
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{artykov2025articulated,
+  title     = {Articulated Object Understanding from a Single Video Sequence},
+  author    = {Artykov, Arslan and Boittiaux, Clémentin and Lepetit, Vincent},
+  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision Workshops (ICCVW)},
+  year      = {2025}
+}</code></pre>
+  </div>
+</section>
+<!--    &lt;!&ndash; Paper video. &ndash;&gt;-->
+<!--    <div class="columns is-centered has-text-centered">-->
+<!--      <div class="column is-four-fifths">-->
+<!--        <h2 class="title is-3">Video</h2>-->
+<!--        <div class="publication-video">-->
+<!--          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"-->
+<!--                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;/ Paper video. &ndash;&gt;-->
+<!--  </div>-->
+<!--</section>-->
+<!--<section class="section">-->
+<!--  <div class="container is-max-desktop">-->
+<!--    <div class="columns is-centered">-->
+<!--      &lt;!&ndash; Visual Effects. &ndash;&gt;-->
+<!--      <div class="column">-->
+<!--        <div class="content">-->
+<!--          <h2 class="title is-3">Visual Effects</h2>-->
+<!--          <p>-->
+<!--            Using <i>nerfies</i> you can create fun visual effects. This Dolly zoom effect-->
+<!--            would be impossible without nerfies since it would require going through a wall.-->
+<!--          </p>-->
+<!--          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">-->
+<!--            <source src="./static/videos/dollyzoom-stacked.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      &lt;!&ndash;/ Visual Effects. &ndash;&gt;-->
+<!--      &lt;!&ndash; Matting. &ndash;&gt;-->
+<!--      <div class="column">-->
+<!--        <h2 class="title is-3">Matting</h2>-->
+<!--        <div class="columns is-centered">-->
+<!--          <div class="column content">-->
+<!--            <p>-->
+<!--              As a byproduct of our method, we can also solve the matting problem by ignoring-->
+<!--              samples that fall outside of a bounding box during rendering.-->
+<!--            </p>-->
+<!--            <video id="matting-video" controls playsinline height="100%">-->
+<!--              <source src="./static/videos/matting.mp4"-->
+<!--                      type="video/mp4">-->
+<!--            </video>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;/ Matting. &ndash;&gt;-->
+<!--    &lt;!&ndash; Animation. &ndash;&gt;-->
+<!--    <div class="columns is-centered">-->
+<!--      <div class="column is-full-width">-->
+<!--        <h2 class="title is-3">Animation</h2>-->
+<!--        &lt;!&ndash; Interpolating. &ndash;&gt;-->
+<!--        <h3 class="title is-4">Interpolating states</h3>-->
+<!--        <div class="content has-text-justified">-->
+<!--          <p>-->
+<!--            We can also animate the scene by interpolating the deformation latent codes of two input-->
+<!--            frames. Use the slider here to linearly interpolate between the left frame and the right-->
+<!--            frame.-->
+<!--          </p>-->
+<!--        </div>-->
+<!--        <div class="columns is-vcentered interpolation-panel">-->
+<!--          <div class="column is-3 has-text-centered">-->
+<!--            <img src="./static/images/interpolate_start.jpg"-->
+<!--                 class="interpolation-image"-->
+<!--                 alt="Interpolate start reference image."/>-->
+<!--            <p>Start Frame</p>-->
+<!--          </div>-->
+<!--          <div class="column interpolation-video-column">-->
+<!--            <div id="interpolation-image-wrapper">-->
+<!--              Loading...-->
+<!--            </div>-->
+<!--            <input class="slider is-fullwidth is-large is-info"-->
+<!--                   id="interpolation-slider"-->
+<!--                   step="1" min="0" max="100" value="0" type="range">-->
+<!--          </div>-->
+<!--          <div class="column is-3 has-text-centered">-->
+<!--            <img src="./static/images/interpolate_end.jpg"-->
+<!--                 class="interpolation-image"-->
+<!--                 alt="Interpolation end reference image."/>-->
+<!--            <p class="is-bold">End Frame</p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <br/>-->
+<!--        &lt;!&ndash;/ Interpolating. &ndash;&gt;-->
+<!--        &lt;!&ndash; Re-rendering. &ndash;&gt;-->
+<!--        <h3 class="title is-4">Re-rendering the input video</h3>-->
+<!--        <div class="content has-text-justified">-->
+<!--          <p>-->
+<!--            Using <span class="dnerf">Nerfies</span>, you can re-render a video from a novel-->
+<!--            viewpoint such as a stabilized camera by playing back the training deformations.-->
+<!--          </p>-->
+<!--        </div>-->
+<!--        <div class="content has-text-centered">-->
+<!--          <video id="replay-video"-->
+<!--                 controls-->
+<!--                 muted-->
+<!--                 preload-->
+<!--                 playsinline-->
+<!--                 width="75%">-->
+<!--            <source src="./static/videos/replay.mp4"-->
+<!--                    type="video/mp4">-->
+<!--          </video>-->
+<!--        </div>-->
+<!--        &lt;!&ndash;/ Re-rendering. &ndash;&gt;-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;/ Animation. &ndash;&gt;-->
+<!--    &lt;!&ndash; Concurrent Work. &ndash;&gt;-->
+<!--    <div class="columns is-centered">-->
+<!--      <div class="column is-full-width">-->
+<!--        <h2 class="title is-3">Related Links</h2>-->
+<!--        <div class="content has-text-justified">-->
+<!--          <p>-->
+<!--            There's a lot of excellent work that was introduced around the same time as ours.-->
+<!--          </p>-->
+<!--          <p>-->
+<!--            <a href="https://arxiv.org/abs/2104.09125">Progressive Encoding for Neural Optimization</a> introduces an idea similar to our windowed position encoding for coarse-to-fine optimization.-->
+<!--          </p>-->
+<!--          <p>-->
+<!--            <a href="https://www.albertpumarola.com/research/D-NeRF/index.html">D-NeRF</a> and <a href="https://gvv.mpi-inf.mpg.de/projects/nonrigid_nerf/">NR-NeRF</a>-->
+<!--            both use deformation fields to model non-rigid scenes.-->
+<!--          </p>-->
+<!--          <p>-->
+<!--            Some works model videos with a NeRF by directly modulating the density, such as <a href="https://video-nerf.github.io/">Video-NeRF</a>, <a href="https://www.cs.cornell.edu/~zl548/NSFF/">NSFF</a>, and <a href="https://neural-3d-video.github.io/">DyNeRF</a>-->
+<!--          </p>-->
+<!--          <p>-->
+<!--            There are probably many more by the time you are reading this. Check out <a href="https://dellaert.github.io/NeRF/">Frank Dellart's survey on recent NeRF papers</a>, and <a href="https://github.com/yenchenlin/awesome-NeRF">Yen-Chen Lin's curated list of NeRF papers</a>.-->
+<!--          </p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;/ Concurrent Work. &ndash;&gt;-->
+<!--  </div>-->
+<!--</section>-->
+<!--<section class="section" id="BibTeX">-->
+<!--  <div class="container is-max-desktop content">-->
+<!--    <h2 class="title">BibTeX</h2>-->
+<!--    <pre><code>@article{park2021nerfies,-->
+<!--  author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},-->
+<!--  title     = {Nerfies: Deformable Neural Radiance Fields},-->
+<!--  journal   = {ICCV},-->
+<!--  year      = {2021},-->
+<!--}</code></pre>-->
+<!--  </div>-->
+<!--</section>-->
+<!--Uncomment till here-->
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is based on template from <a
+              href="https://nerfies.github.io">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
